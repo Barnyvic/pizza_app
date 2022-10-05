@@ -1,22 +1,22 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
+const passportLocalMongoose = require("passport-local-mongoose"); //importing the passPortLocalMongoose
 
 const Schema = mongoose.Schema;
 
-
 const UserSchema = new Schema({
-    UserName: {
-        type: String,
-        required: true,
-        min:4,
-        unique: true
-    },
-    Password: {
-        type: String,
-        required: true,
-        minlength: [6, 'Password must be at least 6 characters long']
-    },
-    User_Type:{ type: String, enum: ['Admin', 'User'] },
-})
+  username: {
+    type: String,
+    required: true,
+    min: 4,
+    unique: true,
+  },
+  password: {
+    type: String,
+    minlength: [6, "Password must be at least 6 characters long"],
+  },
+});
 
+// Using the passportLocalMongoose Plugin
+UserSchema.plugin(passportLocalMongoose);
 
-module.exports = mongoose.model('USERS', UserSchema);
+module.exports = mongoose.model("USERS", UserSchema);

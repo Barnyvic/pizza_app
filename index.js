@@ -1,13 +1,11 @@
 const express = require("express");
-const orderRouters = require("./routers/orderRoute");
-const userRouter = require("./routers/userRouters");
-const authtenticateUser = require("./middleware/auth");
-const ordersRouters = require("./routers/ordersRoute");
 const dbConfig = require("./config/database");
 const session = require("express-session");
 const MongoStore = require("connect-mongo"); //Used to connect session to Mongodb
+const UserSchema = require("./model/userModel");
+const userRouter = require("./routers/userRoutes");
+const passport = require("passport");
 require("dotenv").config();
-
 const PORT = 3334;
 
 const app = express();
@@ -31,11 +29,17 @@ app.use(
   })
 );
 
+// initializing passport
+app.use(passport.initialize());
+// using Passport session middleware
+app.use(passport.session());
+// creating a strategy from userschema
+passport.use(UserSchema.createStrategy());
+// use static serialize and deserialize of model for passport session support
+passport.serializeUser(UserSchema.serializeUser());
+passport.deserializeUser(UserSchema.deserializeUser());
+
 app.use("/user", userRouter);
-
-app.use("/order", authtenticateUser, orderRouters);
-
-app.use("/orders", ordersRouters);
 
 app.get("/", (req, res) => {
   // can use this to know how many people visited a site
