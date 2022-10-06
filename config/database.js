@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const dbConfig = () => {
-  mongoose.connect("mongodb://localhost:27017/PassPort");
+  mongoose.connect("mongodb://localhost:27017/Users");
 
   mongoose.connection.on("connected", () => {
     console.log("Connected to MongoDB Successfully");
