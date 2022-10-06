@@ -16,6 +16,7 @@ dbConfig();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(passport.initialize());
 
 app.use("/", authRoute);
 // Plug in the JWT strategy as a middleware so only verified users can access this route.
@@ -24,6 +25,7 @@ app.use("/books", passport.authenticate("jwt", { session: false }), bookRoute);
 // Handle errors.
 app.use(function (err, req, res, next) {
   res.status(err.status || 500);
+  console.log(err);
   res.json({ error: err });
 });
 

@@ -1,7 +1,7 @@
 const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJWT = require("passport-jwt").ExtractJwt;
-const UserSchema = require("../model/userModel");
+const UserModel = require("../model/userModel");
 const localStrategy = require("passport-local").Strategy;
 require("dotenv").config();
 
@@ -10,7 +10,7 @@ passport.use(
   new JwtStrategy(
     {
       // Extrat JWT from the Header
-      jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken("secret_token"),
+      jwtFromRequest: ExtractJWT.fromUrlQueryParameter("secret_token"),
       secretOrKey: process.env.JWT_SECRET,
     },
     async (token, next) => {
@@ -28,15 +28,15 @@ passport.use(
   "signup",
   new localStrategy(
     {
-      usernameField: "username",
+      usernameField: "email",
       passwordField: "password",
     },
-    async (username, password, next) => {
+    async (email, password, done) => {
       try {
-        const user = await UserSchema.create({ username, password });
-        return next(null, user);
+        const user = await UserModel.create({ email, password });
+        return done(null, user);
       } catch (error) {
-        next(error);
+        done(error);
       }
     }
   )
@@ -47,20 +47,26 @@ passport.use(
   "login",
   new localStrategy(
     {
-      usernameField: "username",
+      usernameField: "email",
       passwordField: "password",
     },
-    async (username, password, next) => {
+    async (email, password, done) => {
       try {
-        const user = await UserSchema.findOne({ username });
-        if (!user)
-          return next(null, false, { message: "User not found Pls Sign Up." });
-        const validate = await user.comparePassword(password);
-        if (!validate)
-          return next(null, false, { message: "Incorrect Password....." });
-        return next(null, user, { message: "Logged In Successfully" });
+        const user = await UserModel.findOne({ email });
+
+        if (!user) {
+          return done(null, false, { message: "User not found" });
+        }
+
+        const validate = await user.isValidPassword(password);
+
+        if (!validate) {
+          return done(null, false, { message: "Wrong Password" });
+        }
+
+        return done(null, user, { message: "Logged in Successfully" });
       } catch (error) {
-        return next(error);
+        return done(error);
       }
     }
   )
