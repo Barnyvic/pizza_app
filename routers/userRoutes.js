@@ -31,4 +31,20 @@ userRouter.post("/logout", (req, res) => {
   });
 });
 
+// resetting a userPassword
+userRouter.post("/reset", async (req, res) => {
+  const userinfo = req.body;
+  const user = await UserSchema.findOne({ username: userinfo.username });
+  if (!user) {
+    return res.send("User not found pls signup");
+  }
+  user.changePassword(userinfo.password, userinfo.newPassword, (err, user) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.send("password changed sucessfully");
+    }
+  });
+});
+
 module.exports = userRouter;
